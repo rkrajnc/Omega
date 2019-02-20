@@ -260,7 +260,6 @@ void vposw(uint16_t value){
 void vhposw(uint16_t value){
     //internal.vPos = (value >> 8);
     //internal.hPos = value;
-    //Converstion with Toni Willen suggests this should never be written to!
 }
 
 void copcon(uint16_t  value){
@@ -336,7 +335,7 @@ void bltsize(uint16_t value){
     chipset.bltsize = chipset.bltsizh;
 
     //Set to blitter busy
-    chipset.dmaconr =chipset.dmaconr | 0x4000;
+    chipset.dmaconr =chipset.dmaconr | 16384;
 }
 
 void bltsizv(uint16_t value){
@@ -448,7 +447,7 @@ void intreq(uint16_t value){
     }
     
     //experimental Interrupt handler
-   // chipset.intreqr &= (chipset.intenar | 0x4000) ;
+    chipset.intreqr &= (chipset.intenar | 0x4000) ;
 }
 
 void adkcon(uint16_t value){
@@ -2290,16 +2289,10 @@ void (*putChipReg16[])(uint16_t) ={
 
 void eclock_execute(Chipset_t* chipset){
     
-    /*
-    The function is caled every DMA slot, which on a real Amiga lasts 280ns.
-    This would be about 3,571,428hz (i.e. 3 million times per second), which it about 5 times the eclock frequency
-    So this function counts down from 5, and then increments the eClock, at a rate of aproximately 715,909hz. 
-     
-     */
     internal.eClockCounter -=1;
     
     if(internal.eClockCounter<0){
-        internal.eClockCounter = 4;
+        internal.eClockCounter = 6; //with a 200line display aproximates the Eclock frequency
         
         //CIA
         CIAExecute(&CIAA);
@@ -2616,11 +2609,8 @@ void blitter_execute(Chipset_t* chipset){
             
         }else{
             
-            static count = 0;
-            
-            printf("Blitter Copy Mode: %d\n",count);
-            
-            count++;
+
+            //printf("Blitter Copy Mode\n");
             
             //Area Copy Blitter
             //printf("blit: A-%06x B-%06x C-%06x D-%06x W-%d H-%d\n",chipset->bltapt,chipset->bltbpt,chipset->bltcpt,chipset->bltdpt,chipset->bltsizh,chipset->bltsizv);
@@ -2656,10 +2646,10 @@ void blitter_execute(Chipset_t* chipset){
             int cmod=chipset->bltcmod / 2;
             int dmod=chipset->bltdmod / 2;
             
-            uint16_t adat=chipset->bltadat;
-            uint16_t bdat=chipset->bltbdat;
-            uint16_t cdat=chipset->bltcdat;
-           // int ddat=chipset->bltddat;
+            int adat=chipset->bltadat;
+            int bdat=chipset->bltbdat;
+            int cdat=chipset->bltcdat;
+            int ddat=chipset->bltddat;
             
             uint16_t afwm = chipset->bltafwm;
             uint16_t alwm = chipset->bltalwm;
@@ -2769,14 +2759,14 @@ void blitter_execute(Chipset_t* chipset){
             chipset->bltsizv = 0; // all done;
             
             //save blitter state - something might depend upon the blitter being in a known state
-            //chipset->bltapt = apt << 1;
-            //chipset->bltbpt = bpt << 1;
-            //chipset->bltcpt = cpt << 1;
-            //chipset->bltdpt = dpt << 1;
-            //chipset->bltadat = adat;
-            //chipset->bltbdat = bdat;
-            //chipset->bltcdat = cdat;
-            //chipset->bltddat = ddat;
+            chipset->bltapt = apt << 1;
+            chipset->bltbpt = bpt << 1;
+            chipset->bltcpt = cpt << 1;
+            chipset->bltdpt = dpt << 1;
+            chipset->bltadat = adat;
+            chipset->bltbdat = bdat;
+            chipset->bltcdat = cdat;
+            chipset->bltddat = ddat;
             
             chipset->dmaconr = chipset->dmaconr & 0xBFFF; //clear blitter busy bit
             putChipReg16[INTREQ](0x8040); // generate an interrupt!
