@@ -17,8 +17,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "Chipset.h"
-
+#include "endianMacros.h"
 #define ADDRESS_SPACE_SIZE 16777215 // address starts at 0, so is 1 less than 16777216 (2^24)
 
 unsigned int cpu_read_byte(unsigned int address);
@@ -34,11 +33,7 @@ void cpu_instr_callback();
 
 void cpu_init();
 void cpu_execute();
-
-void checkInterrupt(Chipset_t*);
-
 void system_loadState(uint32_t*);
-
 
 extern int disass;
 
