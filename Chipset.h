@@ -15,6 +15,7 @@
 #ifndef Chipset_h
 #define Chipset_h
 
+#include <SDL2/SDL.h>
 #include <stdio.h>
 
 #define CHIPBASE 0xDFF000
@@ -546,6 +547,7 @@ extern Internal_t internal;
 
 void ChipsetInit();
 
+void checkInterrupt(Chipset_t*);
 void blitter_execute(Chipset_t*);
 void sprite_execute(Chipset_t*);
 void eclock_execute(Chipset_t*);
