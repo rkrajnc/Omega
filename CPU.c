@@ -99,7 +99,6 @@ void cpu_execute(){
 
 void checkInterrupt(Chipset_t* chipset){
     
-    /*
     int intreqr = chipset->intreqr;
     
     
@@ -170,12 +169,10 @@ void checkInterrupt(Chipset_t* chipset){
     }
     
     return;
-     */
     
     // The old interrupt handling code... works the same as the above code, no idea which is better :-/
     
-    
-    if(chipset->intenar & 0x4000){ // if master interrupt switch is enabled
+    if(chipset->intenar & 16384){ // if master interrupt switch is enabled
         
         uint16_t intMask = chipset->intreqr & chipset->intenar; //only set the int level, if bits are enabled
         
@@ -210,8 +207,6 @@ void checkInterrupt(Chipset_t* chipset){
             }else if(intMask & 1){    // Serial Transmit buffer empty
                 m68k_set_irq(1);
             }
-        }else{
-            m68k_set_irq(0);    // no interupt pending
         }
     }
     
